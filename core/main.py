@@ -8,6 +8,7 @@ from langchain.schema import (
     SystemMessage,
     BaseMessage,
 )
+
 import os
 import json
 from pathlib import Path
@@ -21,55 +22,37 @@ from streamlit_chat_media import message
 import os
 from dotenv import load_dotenv
 
+backend_list = ["hugchat", "llama2"]
+agents_list = ["camel"]
+
 load_dotenv()
 
 st.set_page_config(
-    page_title="FREE AUTOGPT 🚀 by Intelligenza Artificiale Italia",
+    page_title="MyAgents",
     page_icon="🚀",
     layout="wide",
     menu_items={
-        "Get help": "https://www.intelligenzaartificialeitalia.net/",
-        "Report a bug": "mailto:servizi@intelligenzaartificialeitalia.net",
-        "About": "# *🚀  FREE AUTOGPT  🚀* ",
+        "Get help": "http://wiki.enflame.cn/x/UxyfCg",
+        "Report a bug": "mailto:int.champ.wang@enflame-tech.com",
+        "About": "# *🚀  MyAgents  🚀* ",
     },
 )
-
 
 st.markdown(
     "<style> iframe > div {    text-align: left;} </style>", unsafe_allow_html=True
 )
 
+selected_agent = st.sidebar.selectbox(
+    'Select a agent',
+     agents_list)
 
-class CAMELAgent:
-    def __init__(
-        self,
-        system_message: SystemMessage,
-        model: None,
-    ) -> None:
-        self.system_message = system_message.content
-        self.model = model
-        self.init_messages()
+'agent:', selected_agent
 
-    def reset(self) -> None:
-        self.init_messages()
-        return self.stored_messages
+selected_backend = st.sidebar.selectbox(
+    'Select a backend',
+     backend_list)
 
-    def init_messages(self) -> None:
-        self.stored_messages = [self.system_message]
-
-    def update_messages(self, message: BaseMessage) -> List[BaseMessage]:
-        self.stored_messages.append(message)
-        return self.stored_messages
-
-    def step(
-        self,
-        input_message: HumanMessage,
-    ) -> AIMessage:
-        messages = self.update_messages(input_message)
-        output_message = self.model(str(input_message.content))
-        self.update_messages(output_message)
-        print(f"AI Assistant:\n\n{output_message}\n\n")
-        return output_message
+'backend:', selected_backend
 
 
 col1, col2 = st.columns(2)
@@ -79,11 +62,18 @@ task = st.text_area("Task", "Develop a trading bot for the stock market")
 word_limit = st.number_input("Word Limit", 10, 1500, 50)
 
 
-from backend.api import local_inference
+from backend.server import local_inference
+from backend.api import hugchat
 
-llm = local_inference.LocalLlama2GPTQ(url=os.environ["INFERENCE_SERVER_URL"])
+if(selected_backend == 'hugchat'):
+  llm = hugchat.HuggingChat(email = os.environ["emailHF"] , psw = os.environ["pswHF"])
+elif(selected_backend == 'llama2'):
+  llm = local_inference.LocalLlama2GPTQ(url=os.environ["INFERENCE_SERVER_URL"])
 
-
+from agent import camel
+if(selected_agent == 'camel'):
+   agent = camel.CAMELAgent
+   
 if st.button("Start Autonomus AI AGENT"):
     task_specifier_sys_msg = SystemMessage(content="You can make a task more specific.")
     task_specifier_prompt = """Here is a task that {assistant_role_name} will help {user_role_name} to complete: {task}.
@@ -93,7 +83,7 @@ if st.button("Start Autonomus AI AGENT"):
         template=task_specifier_prompt
     )
 
-    task_specify_agent = CAMELAgent(
+    task_specify_agent = agent(
         task_specifier_sys_msg, llm
     )
     task_specifier_msg = task_specifier_template.format_messages(
@@ -195,10 +185,10 @@ if st.button("Start Autonomus AI AGENT"):
     )
 
     # AI ASSISTANT setup                           |-> add the agent LLM MODEL HERE <-|
-    assistant_agent = CAMELAgent(assistant_sys_msg, llm)
+    assistant_agent = agent(assistant_sys_msg, llm)
 
     # AI USER setup                      |-> add the agent LLM MODEL HERE <-|
-    user_agent = CAMELAgent(user_sys_msg, llm)
+    user_agent = agent(user_sys_msg, llm)
 
     # Reset agents
     assistant_agent.reset()

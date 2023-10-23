@@ -1,0 +1,1 @@
+nohup /root/anaconda3/envs/llm/bin/python3.9 /root/anaconda3/envs/llm/bin/streamlit run core/main.py > log/sl_camel.log 2>&1 &

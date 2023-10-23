@@ -1,2 +1,1 @@
-
-streamlit run core/camel.py
+streamlit run core/main.py
