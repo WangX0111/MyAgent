@@ -80,11 +80,8 @@ word_limit = st.number_input("Word Limit", 10, 1500, 50)
 
 
 from backend.api import local_inference
-import toml
 
-config = toml.load(os.path.join(os.path.dirname(__file__), "config.toml"))
-assert "inference_server" in config and "url" in config["inference_server"]
-llm = local_inference.LocalLlama2GPTQ(url=config["inference_server"]["url"])
+llm = local_inference.LocalLlama2GPTQ(url=os.environ["INFERENCE_SERVER_URL"])
 
 
 if st.button("Start Autonomus AI AGENT"):
