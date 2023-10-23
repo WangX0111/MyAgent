@@ -14,5 +14,11 @@ bash scripts/run_streamlit.sh
 ```
 
 ## ref
-[huggingface chat](https://huggingface.co/chat/)
 [FREE AUTOGPT REPOSITORY](https://github.com/IntelligenzaArtificiale/Free-AUTOGPT-with-NO-API)
+### agents
+[camel]()
+
+[babyagi](https://babyagi.org/)
+
+### backends
+[huggingface chat](https://huggingface.co/chat/)
