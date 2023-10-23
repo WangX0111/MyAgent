@@ -1,0 +1,2 @@
+[inference_server]
+url = "your inference server url"

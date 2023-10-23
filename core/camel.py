@@ -78,39 +78,13 @@ user_role_name = col2.text_input("User Role Name", "Stock Trader")
 task = st.text_area("Task", "Develop a trading bot for the stock market")
 word_limit = st.number_input("Word Limit", 10, 1500, 50)
 
-# if not os.path.exists("cookiesHuggingChat.json"):
-#     raise ValueError(
-#         "File 'cookiesHuggingChat.json' not found! Create it and put your cookies in there in the JSON format."
-#     )
-# cookie_path = Path() / "cookiesHuggingChat.json"
-# with open("cookiesHuggingChat.json", "r") as file:
-#     try:
-#         file_json = json.loads(file.read())
-#     except JSONDecodeError:
-#         raise ValueError(
-#             "You did not put your cookies inside 'cookiesHuggingChat.json'! You can find the simple guide to get the cookie file here: https://github.com/IntelligenzaArtificiale/Free-Auto-GPT"
-#         )  
-# llm = HuggingChatAPI.HuggingChat(cookiepath = str(cookie_path))
 
-emailHF = os.getenv("emailHF", "your-emailHF")
-pswHF = os.getenv("pswHF", "your-pswHF")
-if emailHF != "your-emailHF" or pswHF != "your-pswHF":
-    os.environ["emailHF"] = emailHF
-    os.environ["pswHF"] = pswHF
-else:
-    raise ValueError(
-        "HuggingChat Token EMPTY. Edit the .env file and put your HuggingChat credentials"
-    )
+from backend.api import local_inference
+import toml
 
-llm = HuggingChatAPI.HuggingChat(email=os.environ["emailHF"], psw=os.environ["pswHF"])
-
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN", "your-huggingface-token")
-if HF_TOKEN != "your-huggingface-token":
-    os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
-else:
-    raise ValueError(
-        "HuggingFace Token EMPTY. Edit the .env file and put your HuggingFace token"
-    )
+config = toml.load(os.path.join(os.path.dirname(__file__), "config.toml"))
+assert "inference_server" in config and "url" in config["inference_server"]
+llm = local_inference.LocalLlama2GPTQ(url=config["inference_server"]["url"])
 
 
 if st.button("Start Autonomus AI AGENT"):
